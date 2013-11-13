@@ -1,16 +1,20 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Ninject;
 using Rebus;
 using Rebus.Configuration;
 using Rebus.Log4Net;
 using Rebus.Ninject;
 using Rebus.Transports.Msmq;
+using RebusHost.HandlerSample;
 using Topshelf;
 using log4net.Config;
 
 namespace RebusHost
 {
-    class Program :IHandleMessages<string>
+    class Program 
     {
         private IBus _bus;
         private StandardKernel _kernel;
@@ -36,8 +40,13 @@ namespace RebusHost
         void Start()
         {
             _kernel = new StandardKernel();
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
 
-            _kernel.Bind<IHandleMessages<string>>().ToConstant(this);
+            var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
+            var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+            toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+            _kernel.Load(loadedAssemblies);
 
             _bus = Configure.With(new NinjectContainerAdapter(_kernel))
                 .Logging(l => l.Log4Net())
@@ -60,11 +69,6 @@ namespace RebusHost
             if (_kernel != null)
                 _kernel.Dispose();
             _kernel = null;
-        }
-
-        public void Handle(string message)
-        {
-            Console.WriteLine("w00t!!!: {0}", message);
         }
     }
 }

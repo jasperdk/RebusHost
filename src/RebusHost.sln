@@ -10,6 +10,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{3B9ED1
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{269D37B7-9709-4F9F-9648-EC04D1EFB466}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebusHost.HandlerSample", "RebusHost.HandlerSample\RebusHost.HandlerSample.csproj", "{48E81C87-3B3F-4231-8171-FAC283978B9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,15 @@ Global
 		{A0C36A7C-2A4A-474A-B3DB-147F543BF80E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0C36A7C-2A4A-474A-B3DB-147F543BF80E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A0C36A7C-2A4A-474A-B3DB-147F543BF80E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48E81C87-3B3F-4231-8171-FAC283978B9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48E81C87-3B3F-4231-8171-FAC283978B9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48E81C87-3B3F-4231-8171-FAC283978B9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48E81C87-3B3F-4231-8171-FAC283978B9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{48E81C87-3B3F-4231-8171-FAC283978B9D} = {269D37B7-9709-4F9F-9648-EC04D1EFB466}
 	EndGlobalSection
 EndGlobal

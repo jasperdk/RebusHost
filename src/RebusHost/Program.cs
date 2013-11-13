@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,7 +9,6 @@ using Rebus.Configuration;
 using Rebus.Log4Net;
 using Rebus.Ninject;
 using Rebus.Transports.Msmq;
-using RebusHost.HandlerSample;
 using Topshelf;
 using log4net.Config;
 
@@ -39,14 +39,7 @@ namespace RebusHost
 
         void Start()
         {
-            _kernel = new StandardKernel();
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
-
-            var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
-            var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
-            toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
-            _kernel.Load(loadedAssemblies);
+            CreateKernel();
 
             _bus = Configure.With(new NinjectContainerAdapter(_kernel))
                 .Logging(l => l.Log4Net())
@@ -58,6 +51,20 @@ namespace RebusHost
 
             _bus.Send("HELLLLLO WORLD!!!1");
 
+        }
+
+        private void CreateKernel()
+        {
+            _kernel = new StandardKernel();
+            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+            var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+
+            var referencedPaths = Directory.GetFiles(
+                ConfigurationManager.AppSettings["samplePath"], "*.dll");
+            var toLoad =
+                referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+            toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+            _kernel.Load(loadedAssemblies);
         }
 
         void Stop()

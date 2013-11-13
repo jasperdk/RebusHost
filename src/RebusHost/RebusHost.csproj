@@ -65,6 +65,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\HandlerPathConfigElement.cs" />
+    <Compile Include="Configuration\HandlerPathsCollection.cs" />
+    <Compile Include="Configuration\RebusHostConfigurationSection.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

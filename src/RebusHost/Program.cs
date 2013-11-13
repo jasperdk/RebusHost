@@ -9,25 +9,29 @@ using Rebus.Configuration;
 using Rebus.Log4Net;
 using Rebus.Ninject;
 using Rebus.Transports.Msmq;
+using RebusHost.Configuration;
 using Topshelf;
 using log4net.Config;
 
 namespace RebusHost
 {
-    class Program 
+    class Program
     {
         private IBus _bus;
         private StandardKernel _kernel;
 
         static void Main(string[] args)
         {
+            var rebusHostSection =
+               ConfigurationManager.GetSection("rebusHost") as RebusHostConfigurationSection;
+
             XmlConfigurator.Configure();
 
             HostFactory
                 .Run(c =>
                             {
-                                c.SetServiceName("RebusTest");
-                                c.SetDisplayName("RebusTest");
+                                c.SetServiceName(rebusHostSection.ServiceName);
+                                c.SetDisplayName(rebusHostSection.DisplayName);
                                 c.Service<Program>(p =>
                                                     {
                                                         p.ConstructUsing(() => new Program());
@@ -55,24 +59,29 @@ namespace RebusHost
 
         private void CreateKernel()
         {
-            _kernel = new StandardKernel();
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-            var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+            var rebusHostSection =
+                ConfigurationManager.GetSection("rebusHost") as RebusHostConfigurationSection;
 
-            var referencedPaths = Directory.GetFiles(
-                ConfigurationManager.AppSettings["samplePath"], "*.dll");
-            var toLoad =
-                referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
-            toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
-            _kernel.Load(loadedAssemblies);
+            _kernel = new StandardKernel();
+
+            foreach (HandlerPathConfigElement handlerPath in rebusHostSection.HandlerPaths)
+            {
+                var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+                var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+
+                var referencedPaths = Directory.GetFiles(handlerPath.Path, "*.dll");
+                var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+                toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+                _kernel.Load(loadedAssemblies);
+            }
         }
 
         void Stop()
         {
-
             if (_bus != null)
                 _bus.Dispose();
             _bus = null;
+
             if (_kernel != null)
                 _kernel.Dispose();
             _kernel = null;
